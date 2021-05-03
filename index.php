@@ -32,11 +32,11 @@ class Website
       
     public function test()
     {
-        $filename = $_GET['testobject'].'.csv';
+        $filename = $_POST['testobject'].'.csv';
         
-        if($_GET['api'] === 'secret_api_key'){
+        if($_POST['api'] === 'secretAPIkey'){
             
-            $record = $_GET['record'];
+            $record = $_POST['record'];
             
             $time =  $date = date('Y-m-d_H:i:s ', time());
           
@@ -51,7 +51,7 @@ class Website
             
              
         }
-        elseif($_SESSION['login'] === TRUE or $_GET['field'] === 'secret_login_key')
+        elseif($_SESSION['login'] === TRUE or $_GET['field'] === 'login_key')
         {
             $_SESSION['login'] = TRUE;
             $content = '';
