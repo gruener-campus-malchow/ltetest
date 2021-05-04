@@ -25,5 +25,5 @@ crontab -e
 ~~~
 paste at the end but look for changes
 ~~~
-*/5 *    * * *   /usr/bin/curl --silent -d "api=secretAPIkey&testobject=myTestInstance&record='$(/usr/bin/python3 /home/username/speedtest-cli/speedtest.py --csv)'" -H "Content-Type: application/x-www-form-urlencoded" -X POST https://myownsite.de/
+*/5 *    * * *   /usr/bin/curl --silent -d "api=secretAPIkey&testobject=myTestInstance&record=$(/usr/bin/python3 /home/username/speedtest-cli/speedtest.py --csv)" -H "Content-Type: application/x-www-form-urlencoded" -X POST https://myownsite.de/
 ~~~
