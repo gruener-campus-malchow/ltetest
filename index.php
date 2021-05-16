@@ -31,15 +31,19 @@ class Website
     } 
       
     public function test()
-    {
-        $filename = $_POST['testobject'].'.csv';
-        
+    {        
         if($_POST['api'] === 'secretAPIkey'){
             
+			$filename = $_POST['testobject'].'.csv';
             $record = $_POST['record'];
-            
-            $time =  $date = date('Y-m-d_H:i:s ', time());
-          
+
+			$filename = strtolower($filename);
+			// Remove anything which isn't a word, number or any of the following caracters -_~,;[]().
+			$filename = preg_replace("([^\w\d\-_~,;\[\]\(\).])", '', $filename);
+			// Remove any runs of periods
+			$filename = preg_replace("([\.]{2,})", '', $filename);
+
+			$time =  $date = date('Y-m-d_H:i:s ', time());
             
             $handle = fopen($filename, 'a');
             
