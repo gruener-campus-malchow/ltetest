@@ -17,6 +17,8 @@ class Website
                 <meta charset="utf-8">
                 <meta name="viewport"content="width=device-width, initial-scale=1.0">
     <title>'.$title.'</title>
+    <script type="text/javascript" src="https://cdn.fusioncharts.com/fusioncharts/latest/fusioncharts.js"></script>
+    <script type="text/javascript" src="https://cdn.fusioncharts.com/fusioncharts/latest/themes/fusioncharts.theme.fusion.js"></script>
   </head><body>';
 
         $this->foot = "
@@ -29,17 +31,70 @@ class Website
     {
         return $this->head . $this->body . $this->foot;    
     } 
-      
-    public function test()
-    {
-        $filename = $_POST['testobject'].'.csv';
-        
+
+	public function readCSV($file)
+	{
+		$row = 1;
+		if (($handle = fopen($file, "r")) !== FALSE) {
+			while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+				$row++;
+				return "{label:'" . $file . "', value:'" . $data[0] . "'}";
+			}
+
+			fclose($handle);
+		}
+
+		return "{}";
+	}
+
+	public function addChart()
+	{
+		$this->body.='<script>';
+		$this->body.='
+			const chartConfig = {
+			  type: "column2d",
+			  renderAt: "chart-container",
+			  width: "50%",
+			  height: "300",
+			  dataFormat: "json",
+			  dataSource: {
+				chart: {
+				  caption: "Irgendwas mit LTE-Routern",
+				  subCaption: "ist noch in Arbeit",
+				  xAxisName: "Namen der Router",
+				  yAxisName: "Geschwindigkeit (Mbit / s)",
+				  numberSuffix: "",
+				  theme: "fusion"
+				},
+				data: chartData
+			  }
+			};
+		';
+
+		$this->body.='
+			FusionCharts.ready(function(){
+				var fusioncharts = new FusionCharts(chartConfig);
+				fusioncharts.render();
+			});
+		';
+		$this->body.='</script>';
+		$this->body.='<div id="chart-container">Die Grafik lädt...</div>';
+	}
+
+	public function test()
+    {        
         if($_POST['api'] === 'secretAPIkey'){
             
+			$filename = $_POST['testobject'].'.csv';
             $record = $_POST['record'];
-            
-            $time =  $date = date('Y-m-d_H:i:s ', time());
-          
+
+			$filename = strtolower($filename);
+			// Remove anything which isn't a word, number or any of the following caracters -_~,;[]().
+			$filename = preg_replace("([^\w\d\-_~,;\[\]\(\).])", '', $filename);
+			// Remove any runs of periods
+			$filename = preg_replace("([\.]{2,})", '', $filename);
+
+			$time =  $date = date('Y-m-d_H:i:s ', time());
             
             $handle = fopen($filename, 'a');
             
@@ -58,6 +113,7 @@ class Website
             $verzeichnis = ".";
             $content .= "<ol>";
 
+			$content .= "<script>var chartData = [];</script>";
 
             if ( is_dir ( $verzeichnis )){
                 if ( $handle = opendir($verzeichnis) ){
@@ -71,6 +127,7 @@ class Website
                                             size: '.(filesize($file)/1024).'
                                             kB, last update: '.date(DATE_RFC822, stat($file)['mtime'])."
                                         </li>\n";
+							$content .= "<script>chartData.push(" . $this->readCSV($file) . ");</script>";
                         }
                     }
                     closedir($handle);
@@ -105,7 +162,8 @@ class Website
             </div>
             
             ';
-                  
+
+			$this->addChart();
         }
         else{
 
